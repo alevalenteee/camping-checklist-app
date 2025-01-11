@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircleIcon, PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import NewItemModal from './NewItemModal'
 import ConfirmationModal from './ConfirmationModal'
-import { Category, ChecklistItem as ChecklistItemType } from '@/app/types'
+import type { Category, ChecklistItem as ChecklistItemType } from '../../lib/types'
 import ChecklistItem from './ChecklistItem'
 
 interface Props {
@@ -108,7 +108,7 @@ export default function ChecklistCategory({
 
       <div className="relative" style={{ height: `${sortedItems.length * itemHeight}px` }}>
         <AnimatePresence>
-        {sortedItems.map((item, index) => (
+        {sortedItems.map((item: ChecklistItemType, index: number) => (
           <motion.div 
             key={item.id}
             initial={false}
@@ -159,8 +159,8 @@ export default function ChecklistCategory({
         onSubmit={handleEditItem}
         title="Edit Item"
         placeholder="Item name"
-        initialValue={editingItemId ? category.items.find(item => item.id === editingItemId)?.text || '' : ''}
-        initialCapacity={editingItemId ? category.items.find(item => item.id === editingItemId)?.capacity : undefined}
+        initialValue={editingItemId ? category.items.find((item: ChecklistItemType) => item.id === editingItemId)?.text || '' : ''}
+        initialCapacity={editingItemId ? category.items.find((item: ChecklistItemType) => item.id === editingItemId)?.capacity : undefined}
         showCapacity={true}
       />
 

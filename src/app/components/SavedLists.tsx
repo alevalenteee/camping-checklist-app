@@ -1,6 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  ArrowPathIcon, 
+  TrashIcon, 
+  PencilIcon,
+  FolderIcon,
+  CheckCircleIcon
+} from '@heroicons/react/24/outline'
+import { SavedChecklist } from '@/lib/types'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { 
   getUserChecklists, 
@@ -9,8 +19,6 @@ import {
   checkListExists,
   saveChecklist 
 } from '@/lib/firebase/firebaseUtils'
-import { SavedChecklist } from '@/app/types'
-import { ArrowPathIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline'
 import ConfirmationModal from './ConfirmationModal'
 import NewItemModal from './NewItemModal'
 

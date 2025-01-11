@@ -17,10 +17,12 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  serverTimestamp
+  serverTimestamp,
+  DocumentData,
+  QueryDocumentSnapshot
 } from 'firebase/firestore'
 import { auth, db } from './firebase'
-import { Category } from '@/app/types'
+import type { Category, SavedChecklist } from '@/lib/types'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from './firebase'
 
@@ -158,7 +160,7 @@ export const checkListExists = async (userId: string, listName: string) => {
   return listDoc.exists()
 }
 
-export const addDocument = async (collectionName: string, data: any) => {
+export const addDocument = async (collectionName: string, data: Record<string, any>) => {
   try {
     const collectionRef = collection(db, collectionName);
     const docRef = await addDoc(collectionRef, {
@@ -170,5 +172,18 @@ export const addDocument = async (collectionName: string, data: any) => {
   } catch (error) {
     console.error('Error adding document:', error);
     throw error;
+  }
+}
+
+const transformChecklist = (doc: QueryDocumentSnapshot<DocumentData>) => {
+  const data = doc.data()
+  return {
+    id: doc.id,
+    name: data.name,
+    categories: data.categories.map((item: Category) => ({
+      ...item,
+      items: item.items || []
+    })),
+    updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
   }
 }

@@ -1,7 +1,9 @@
 'use client'
 
 import { CheckCircleIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { ChecklistItem as ChecklistItemType } from '@/app/types'
+import type { ChecklistItem as ChecklistItemType } from '@/lib/types'
+import NewItemModal from './NewItemModal'
+import ConfirmationModal from './ConfirmationModal'
 
 interface Props {
   item: ChecklistItemType

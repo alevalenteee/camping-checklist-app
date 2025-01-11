@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useAuth } from '@/lib/hooks/useAuth'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Category } from '@/app/types'
+import Image from 'next/image'
+import { Category } from '@/lib/types'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { updateProfile } from '@/lib/firebase/firebaseUtils'
 import SavedLists from '@/app/components/SavedLists'
 import ProfileImage from '@/app/components/ProfileImage'
-import { updateProfile } from '@/lib/firebase/firebaseUtils'
 
 export default function Profile() {
   const { user } = useAuth()

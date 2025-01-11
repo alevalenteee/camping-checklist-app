@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlusIcon, BookmarkIcon, DocumentPlusIcon, TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
-import { ChecklistItem, Category } from '@/app/types'
+import type { ChecklistItem, Category } from '../../lib/types'
 import ChecklistCategory from '@/app/components/ChecklistCategory'
 import NewItemModal from './NewItemModal'
 import SaveListModal from './SaveListModal'
@@ -144,7 +144,7 @@ export default function CampingChecklist() {
       if (category.id === categoryId) {
         return {
           ...category,
-          items: category.items.map(item => 
+          items: category.items.map((item: ChecklistItem) => 
             item.id === itemId ? { ...item, checked: !item.checked } : item
           )
         }
@@ -195,7 +195,7 @@ export default function CampingChecklist() {
       if (category.id === categoryId) {
         return {
           ...category,
-          items: category.items.map(item =>
+          items: category.items.map((item: ChecklistItem) =>
             item.id === itemId ? { 
               ...item, 
               text: newText,
@@ -213,7 +213,7 @@ export default function CampingChecklist() {
       if (category.id === categoryId) {
         return {
           ...category,
-          items: category.items.filter(item => item.id !== itemId)
+          items: category.items.filter((item: ChecklistItem) => item.id !== itemId)
         }
       }
       return category
