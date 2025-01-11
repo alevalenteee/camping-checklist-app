@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useAuth } from '@/lib/contexts/AuthContext'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { signOut } from '@/lib/firebase/firebaseUtils'
 import imageLoader from '@/app/lib/imageLoader'
 

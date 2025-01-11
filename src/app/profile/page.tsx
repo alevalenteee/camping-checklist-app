@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/lib/contexts/AuthContext'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { Category } from '@/app/types'
 import SavedLists from '@/app/components/SavedLists'

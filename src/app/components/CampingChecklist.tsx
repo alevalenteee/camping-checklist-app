@@ -8,7 +8,7 @@ import ChecklistCategory from '@/app/components/ChecklistCategory'
 import NewItemModal from './NewItemModal'
 import SaveListModal from './SaveListModal'
 import ConfirmationModal from './ConfirmationModal'
-import { useAuth } from '@/lib/contexts/AuthContext'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { saveChecklist, checkListExists, deleteChecklist } from '@/lib/firebase/firebaseUtils'
 import { useRouter } from 'next/navigation'
 

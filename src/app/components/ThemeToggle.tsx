@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from '@/app/contexts/ThemeContext'
-import { useAuth } from '@/lib/contexts/AuthContext'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
 import { signOut, signInWithGoogle } from '@/lib/firebase/firebaseUtils'
 import ProfileImage from './ProfileImage'

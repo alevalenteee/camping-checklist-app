@@ -157,3 +157,18 @@ export const checkListExists = async (userId: string, listName: string) => {
   const listDoc = await getDoc(listRef)
   return listDoc.exists()
 }
+
+export const addDocument = async (collectionName: string, data: any) => {
+  try {
+    const collectionRef = collection(db, collectionName);
+    const docRef = await addDoc(collectionRef, {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding document:', error);
+    throw error;
+  }
+}

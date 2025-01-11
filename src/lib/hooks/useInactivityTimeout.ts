@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { signOut } from '../firebase/firebaseUtils';
 import { User } from 'firebase/auth';
 
@@ -7,7 +7,7 @@ const INACTIVITY_TIMEOUT = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 export const useInactivityTimeout = (user: User | null) => {
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -16,7 +16,7 @@ export const useInactivityTimeout = (user: User | null) => {
         await signOut();
       }, INACTIVITY_TIMEOUT);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -53,5 +53,5 @@ export const useInactivityTimeout = (user: User | null) => {
         document.removeEventListener(event, handleActivity);
       });
     };
-  }, [user]); // Add user as a dependency
+  }, [user, resetTimer]); // Added resetTimer to dependencies
 }; 

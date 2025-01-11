@@ -4,15 +4,20 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from 'firebase/auth'
 import { auth } from '../firebase/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
+import { signInWithGoogle, signOut } from '../firebase/firebaseUtils'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
+  signInWithGoogle: () => Promise<User>
+  signOut: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   user: null,
-  loading: true
+  loading: true,
+  signInWithGoogle: async () => { throw new Error('Not implemented') },
+  signOut: async () => { throw new Error('Not implemented') }
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -34,16 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
       {!loading && children}
     </AuthContext.Provider>
   )
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }

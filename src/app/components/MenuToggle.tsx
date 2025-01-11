@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bars3Icon, XMarkIcon, HomeIcon } from '@heroicons/react/24/outline'
 import { useTheme } from '@/app/contexts/ThemeContext'
-import { useAuth } from '@/lib/contexts/AuthContext'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter, usePathname } from 'next/navigation'
 import { signInWithGoogle, signOut } from '@/lib/firebase/firebaseUtils'
 import Image from 'next/image'
