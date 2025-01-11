@@ -134,8 +134,8 @@ export default function ChecklistCategory({
 
       <button
         onClick={() => setIsNewItemModalOpen(true)}
-        className="mt-4 w-full p-2 sm:p-3 border border-dashed border-green-200 rounded-lg
-                   text-green-600 dark:text-green-400 dark:border-green-700
+        className="mt-4 w-full p-2 sm:p-3 border border-dashed border-green-800 rounded-lg
+                   text-green-800 dark:text-green-400 dark:border-green-700
                    hover:bg-white/50 dark:hover:bg-gray-700/50 transition-all
                    flex items-center justify-center gap-2 text-sm sm:text-base
                    font-space-grotesk font-semibold"

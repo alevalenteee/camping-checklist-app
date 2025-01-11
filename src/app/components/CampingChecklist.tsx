@@ -55,7 +55,7 @@ export default function CampingChecklist() {
       localStorage.removeItem('savedListName') // Clear after loading
       return savedName
     }
-    return 'Camping Checklist'
+    return 'New Checklist'
   })
 
   const [categories, setCategories] = useState<Category[]>(() => {
@@ -63,7 +63,15 @@ export default function CampingChecklist() {
     const saved = localStorage.getItem('savedCategories')
     if (saved) {
       localStorage.removeItem('savedCategories') // Clear after loading
-      return JSON.parse(saved)
+      const parsedCategories = JSON.parse(saved)
+      // Set initial state after loading from localStorage
+      setTimeout(() => {
+        setOriginalState({
+          name: listName,
+          categories: parsedCategories
+        })
+      }, 0)
+      return parsedCategories
     }
     // Return empty array if no saved categories
     return []
@@ -83,9 +91,21 @@ export default function CampingChecklist() {
     categories: Category[];
   } | null>(null);
 
+  // Update original state when list is loaded or saved
+  const updateOriginalState = useCallback(() => {
+    setOriginalState({
+      name: listName,
+      categories: JSON.parse(JSON.stringify(categories)) // Deep copy
+    });
+  }, [categories, listName]);
+
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = (): boolean => {
-    if (!originalState) return true;
+    // If it's a new list (listName is 'New Checklist'), always return true
+    if (listName === 'New Checklist') return true;
+    
+    // If there's no original state but it's not a new list, return false
+    if (!originalState) return false;
     
     // Check if name has changed
     if (originalState.name !== listName) return true;
@@ -97,17 +117,10 @@ export default function CampingChecklist() {
     return JSON.stringify(originalState.categories) !== JSON.stringify(categories);
   };
 
-  // Update original state when list is loaded or saved
-  const updateOriginalState = useCallback(() => {
-    setOriginalState({
-      name: listName,
-      categories: JSON.parse(JSON.stringify(categories)) // Deep copy
-    });
-  }, [categories, listName]);
-
   const resetList = () => {
     setCategories([])
-    setListName('Camping Checklist')
+    setListName('New Checklist')
+    setOriginalState(null) // Reset original state when creating new list
   }
 
   const handleSaveList = async (name: string) => {
@@ -115,6 +128,13 @@ export default function CampingChecklist() {
     try {
       setIsSaving(true)
       setError('')
+
+      // Check if list is empty
+      if (categories.length === 0) {
+        setError("Whoops, please add a Category!")
+        return
+      }
+
       // Check if list exists
       const exists = await checkListExists(user.uid, name)
       if (exists) {
@@ -241,6 +261,13 @@ export default function CampingChecklist() {
     try {
       setIsSaving(true)
       setError('')
+
+      // Check if list is empty
+      if (categories.length === 0) {
+        setError("Whoops, please add a Category!")
+        return
+      }
+
       await saveChecklist(user.uid, listName, categories)
       // Update original state after successful save
       updateOriginalState()
@@ -255,13 +282,6 @@ export default function CampingChecklist() {
       setIsSaving(false)
     }
   }
-
-  // Initialize original state when categories are loaded
-  useEffect(() => {
-    if (categories.length > 0 && listName !== 'Camping Checklist') {
-      updateOriginalState();
-    }
-  }, [categories.length, listName, updateOriginalState]); // Dependencies are now properly memoized
 
   return (
     <div className="space-y-4 sm:space-y-6 bg-white/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg
@@ -283,7 +303,7 @@ export default function CampingChecklist() {
               <DocumentPlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>New List</span>
             </button>
-            {listName !== 'Camping Checklist' && (
+            {listName !== 'New Checklist' && (
               <button
                 onClick={() => setIsConfirmDeleteOpen(true)}
                 disabled={isSaving}
@@ -299,7 +319,7 @@ export default function CampingChecklist() {
               </button>
             )}
             <button
-              onClick={listName === 'Camping Checklist' ? () => setIsSaveModalOpen(true) : saveExistingList}
+              onClick={listName === 'New Checklist' ? () => setIsSaveModalOpen(true) : saveExistingList}
               disabled={isSaving || !hasUnsavedChanges()}
               className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white/50 dark:bg-gray-800/50
                        backdrop-blur-sm rounded-lg text-green-800 dark:text-green-400
@@ -363,7 +383,7 @@ export default function CampingChecklist() {
       {user && (
         <button 
           onClick={() => setIsNewCategoryModalOpen(true)}
-          className="w-full p-3 sm:p-4 border-2 border-dashed border-green-300 rounded-lg
+          className="w-full p-3 sm:p-4 border-2 border-dashed border-green-800 rounded-lg
                      text-green-800 dark:text-green-400 dark:border-green-700
                      hover:bg-green-50 dark:hover:bg-gray-700/50 transition-all hover:shadow-md
                      flex items-center justify-center gap-2 text-sm sm:text-base

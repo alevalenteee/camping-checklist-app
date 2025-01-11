@@ -63,11 +63,7 @@ export default function ProfileImage({ user, size = 'sm', editable = false, onIm
   }
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
+    <div className="relative">
       {user?.photoURL ? (
         <Image
           loader={imageLoader}
@@ -86,25 +82,9 @@ export default function ProfileImage({ user, size = 'sm', editable = false, onIm
       ) : (
         <div className={`${sizeClasses[size]} rounded-full ${getColorScheme.bg}
                         flex items-center justify-center ${getColorScheme.text} 
-                        font-space-grotesk font-semibold
-                        cursor-pointer`}>
+                        font-space-grotesk font-semibold`}>
           {getInitial()}
         </div>
-      )}
-      
-      {editable && isHovering && (
-        <label
-          className="absolute inset-0 rounded-full bg-black/50 cursor-pointer
-                     flex items-center justify-center transition-all"
-        >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="hidden"
-          />
-          <CameraIcon className="w-6 h-6 text-white" />
-        </label>
       )}
     </div>
   )
