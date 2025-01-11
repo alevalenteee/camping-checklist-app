@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
-
-const openai = new OpenAI();
 
 export async function POST(req: Request) {
   try {
@@ -11,14 +8,25 @@ export async function POST(req: Request) {
     // Convert the base64 audio data to a Buffer
     const audioBuffer = Buffer.from(base64Audio, "base64");
 
-    // Create a File object from the buffer
-    const audioFile = new File([audioBuffer], "audio.wav", { type: "audio/wav" });
+    // Create form data
+    const formData = new FormData();
+    formData.append('file', new Blob([audioBuffer], { type: 'audio/wav' }), 'audio.wav');
+    formData.append('model', 'whisper-1');
 
-    const data = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-1",
+    // Make request directly to OpenAI API
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: formData,
     });
 
+    if (!response.ok) {
+      throw new Error(`OpenAI API responded with status: ${response.status}`);
+    }
+
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error processing audio:", error);
