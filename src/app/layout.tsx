@@ -1,3 +1,5 @@
+'use client'
+
 import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -6,6 +8,9 @@ import { AuthProvider } from '@/lib/contexts/AuthContext'
 import MenuToggle from './components/MenuToggle'
 import Logo from './components/Logo'
 import InactivityHandler from './components/InactivityHandler'
+import UpdateNotification from './components/UpdateNotification'
+import VersionHistoryButton from './components/VersionHistoryButton'
+import { useState } from 'react'
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'],
@@ -32,6 +37,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const [showUpdateManually, setShowUpdateManually] = useState(false)
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -60,7 +67,8 @@ export default function RootLayout({
                       <Logo />
                     </div>
                     
-                    <div className="flex-1 flex justify-end">
+                    <div className="flex-1 flex justify-end gap-2">
+                      <VersionHistoryButton onShowUpdate={() => setShowUpdateManually(true)} />
                       <div className="block">
                         <ThemeToggle showProfileControls={false} />
                       </div>
@@ -78,6 +86,10 @@ export default function RootLayout({
                 {children}
               </main>
             </InactivityHandler>
+            <UpdateNotification 
+              forceShow={showUpdateManually} 
+              onClose={() => setShowUpdateManually(false)} 
+            />
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -85,7 +85,7 @@ export default function ThemeToggle({
           onClick={handleSignIn}
           disabled={isLoading}
           className={`${isMobile ? mobileClasses : desktopClasses}
-                   text-green-600 dark:text-green-400
+                   text-green-800 dark:text-green-400
                    hover:bg-white/70 dark:hover:bg-gray-700/50 transition-all
                    disabled:opacity-50 disabled:cursor-not-allowed
                    font-space-grotesk font-semibold`}

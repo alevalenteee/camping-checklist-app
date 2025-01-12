@@ -11,6 +11,7 @@ import ConfirmationModal from './ConfirmationModal'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { saveChecklist, checkListExists, deleteChecklist } from '@/lib/firebase/firebaseUtils'
 import { useRouter } from 'next/navigation'
+import TutorialNotification from './TutorialNotification'
 
 const EmptyState = () => (
   <div className="text-center py-12">
@@ -39,7 +40,8 @@ const SignInPrompt = () => {
         onClick={() => router.push('/signin')}
         className="px-6 py-3 bg-white/50 dark:bg-gray-700/50 rounded-lg 
                  text-green-800 dark:text-green-400 font-space-grotesk font-semibold
-                 hover:bg-white/70 dark:hover:bg-gray-600/50 transition-all"
+                 hover:bg-white/70 dark:hover:bg-gray-600/50 transition-all
+                 shadow-lg hover:shadow-xl"
       >
         Sign In
       </button>
@@ -90,6 +92,15 @@ export default function CampingChecklist() {
     name: string;
     categories: Category[];
   } | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false)
+
+  // Add this effect to check when to show the tutorial
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('hasSeenTutorial')
+    if (!hasSeenTutorial && categories.some(cat => cat.items.length > 0)) {
+      setShowTutorial(true)
+    }
+  }, [categories])
 
   // Update original state when list is loaded or saved
   const updateOriginalState = useCallback(() => {
@@ -418,6 +429,11 @@ export default function CampingChecklist() {
         onConfirm={handleDeleteList}
         title="Delete List?"
         message="Are you sure you want to delete this list? This action cannot be undone."
+      />
+
+      <TutorialNotification 
+        show={showTutorial} 
+        onDismiss={() => setShowTutorial(false)} 
       />
     </div>
   )
