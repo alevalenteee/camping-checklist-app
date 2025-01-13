@@ -187,3 +187,50 @@ const transformChecklist = (doc: QueryDocumentSnapshot<DocumentData>) => {
     updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
   }
 }
+
+export const createSharedList = async (userId: string, listName: string, categories: Category[]) => {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId))
+    const userData = userDoc.data()
+    
+    const sharedListRef = collection(db, 'shared_lists')
+    const docRef = await addDoc(sharedListRef, {
+      originalUserId: userId,
+      originalUserName: userData?.name || 'Unknown User',
+      originalListName: listName,
+      categories,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    })
+    
+    return docRef.id // This will be the sharing ID
+  } catch (error) {
+    console.error('Error creating shared list:', error)
+    throw error
+  }
+}
+
+export const getSharedList = async (shareId: string) => {
+  try {
+    const docRef = doc(db, 'shared_lists', shareId)
+    const docSnap = await getDoc(docRef)
+    
+    if (!docSnap.exists()) {
+      throw new Error('Shared list not found')
+    }
+    
+    const data = docSnap.data()
+    return {
+      id: docSnap.id,
+      originalUserId: data.originalUserId,
+      originalUserName: data.originalUserName,
+      originalListName: data.originalListName,
+      categories: data.categories,
+      createdAt: data.createdAt?.toDate?.() || new Date(),
+      updatedAt: data.updatedAt?.toDate?.() || new Date()
+    }
+  } catch (error) {
+    console.error('Error getting shared list:', error)
+    throw error
+  }
+}

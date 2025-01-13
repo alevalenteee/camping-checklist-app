@@ -1,6 +1,6 @@
 {
   "name": "template-2",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -37,5 +37,15 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
+  },
+  "description": "A camping checklist app with list sharing capabilities",
+  "releaseNotes": {
+    "1.1.0": [
+      "Added list sharing functionality",
+      "Users can now share their checklists via unique URLs",
+      "Recipients can view and save shared lists to their account",
+      "Added animated toast notifications for better UX",
+      "Improved UI with new share button and animations"
+    ]
   }
 }

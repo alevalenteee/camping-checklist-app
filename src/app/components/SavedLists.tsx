@@ -8,7 +8,8 @@ import {
   TrashIcon, 
   PencilIcon,
   FolderIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline'
 import { SavedChecklist } from '@/lib/types'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -21,6 +22,7 @@ import {
 } from '@/lib/firebase/firebaseUtils'
 import ConfirmationModal from './ConfirmationModal'
 import NewItemModal from './NewItemModal'
+import Toast from './Toast'
 
 interface Props {
   onLoadList: (categories: SavedChecklist['categories'], name: string) => void
@@ -38,6 +40,9 @@ export default function SavedLists({ onLoadList }: Props) {
     list: SavedChecklist;
     newName: string;
   } | null>(null)
+  const [sharing, setSharing] = useState<string | null>(null)
+  const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [showToast, setShowToast] = useState(false)
 
   const formatDate = (timestamp: string) => {
     const date = new Date(timestamp)
@@ -134,6 +139,40 @@ export default function SavedLists({ onLoadList }: Props) {
     }
   }
 
+  const handleShare = async (list: SavedChecklist) => {
+    if (!user) return
+    try {
+      setSharing(list.id)
+      const response = await fetch('/api/lists/share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.uid,
+          listName: list.name,
+          categories: list.categories,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to share list')
+      }
+
+      const { shareUrl } = await response.json()
+      setShareUrl(shareUrl)
+
+      // Copy to clipboard and show toast
+      await navigator.clipboard.writeText(shareUrl)
+      setShowToast(true)
+    } catch (error) {
+      console.error('Error sharing list:', error)
+      setError('Failed to share list')
+    } finally {
+      setSharing(null)
+    }
+  }
+
   useEffect(() => {
     if (!user) return
 
@@ -212,6 +251,20 @@ export default function SavedLists({ onLoadList }: Props) {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
+                    handleShare(list)
+                  }}
+                  className={`p-2 text-green-600 dark:text-green-400
+                           hover:bg-white/50 dark:hover:bg-gray-700/50 
+                           rounded-lg transition-all
+                           ${sharing === list.id ? 'animate-pulse' : ''}`}
+                  title="Share list"
+                  disabled={sharing === list.id}
+                >
+                  <ShareIcon className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setEditingList(list)
                   }}
                   className="p-2 text-green-600 dark:text-green-400
@@ -277,6 +330,12 @@ export default function SavedLists({ onLoadList }: Props) {
         onConfirm={handleConfirmOverwrite}
         title="Overwrite List?"
         message={`A list named "${pendingRename?.newName}" already exists. Do you want to overwrite it?`}
+      />
+
+      <Toast 
+        message="Share link copied to clipboard!"
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
       />
     </div>
   )
