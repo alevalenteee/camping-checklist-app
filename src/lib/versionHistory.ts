@@ -6,6 +6,17 @@ interface VersionUpdate {
 
 export const versionHistory: VersionUpdate[] = [
   {
+    version: "1.1.0",
+    date: "2024-03-20",
+    features: [
+      "Added list sharing functionality",
+      "Users can now share their checklists via unique URLs",
+      "Recipients can view and save shared lists to their account",
+      "Added animated toast notifications for better UX",
+      "Improved UI with new share button and animations"
+    ]
+  },
+  {
     version: "1.0.0",
     date: "2024-03-19",
     features: [
@@ -15,7 +26,6 @@ export const versionHistory: VersionUpdate[] = [
       "Added checklist item capacity indicators"
     ]
   }
-  // New versions will be added here
 ];
 
 export const LATEST_VERSION = versionHistory[0].version; 
