@@ -7,7 +7,7 @@ interface VersionUpdate {
 export const versionHistory: VersionUpdate[] = [
   {
     version: "1.1.0",
-    date: "2024-03-20",
+    date: "14/01/2025",
     features: [
       "Added list sharing functionality",
       "Users can now share their checklists via unique URLs",
@@ -18,7 +18,7 @@ export const versionHistory: VersionUpdate[] = [
   },
   {
     version: "1.0.0",
-    date: "2024-03-19",
+    date: "13/01/2025",
     features: [
       "Added swipe-to-edit functionality for mobile devices",
       "Improved UI responsiveness and animations",
