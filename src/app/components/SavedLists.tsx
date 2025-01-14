@@ -99,8 +99,12 @@ export default function SavedLists({ onLoadList }: Props) {
         return
       }
       
-      await deleteChecklist(user.uid, editingList.name)
+      // First save the new list
       await saveChecklist(user.uid, newName, editingList.categories)
+      // Then delete the old list if the names are different
+      if (newName !== editingList.name) {
+        await deleteChecklist(user.uid, editingList.name)
+      }
       
       setLists(lists.map(list => 
         list.id === editingList.id 
@@ -121,8 +125,12 @@ export default function SavedLists({ onLoadList }: Props) {
     if (!pendingRename || !user) return
     try {
       const { list, newName } = pendingRename
-      await deleteChecklist(user.uid, newName)
+      // First save the new list
       await saveChecklist(user.uid, newName, list.categories)
+      // Then delete the old list if the names are different
+      if (newName !== list.name) {
+        await deleteChecklist(user.uid, list.name)
+      }
       
       setLists(lists.map(l => 
         l.id === list.id 

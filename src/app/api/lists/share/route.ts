@@ -1,27 +1,27 @@
 import { NextResponse } from 'next/server'
-import { createSharedList, getSharedList } from '@/lib/firebase/firebaseUtils'
+import { adminDb } from '@/lib/firebase/firebase-admin'
+import { Timestamp } from 'firebase-admin/firestore'
 
 export async function POST(request: Request) {
   try {
     const { userId, listName, categories } = await request.json()
-    
-    if (!userId || !listName || !categories) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
 
-    const shareId = await createSharedList(userId, listName, categories)
-    const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/lists/shared/${shareId}`
-    
-    return NextResponse.json({ shareId, shareUrl })
+    // Create a shared list document using admin SDK
+    const docRef = await adminDb.collection('shared_lists').add({
+      originalUserId: userId,
+      listName,
+      categories,
+      createdAt: Timestamp.now(),
+      isReadOnly: true
+    })
+
+    // Generate the share URL
+    const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/shared/${docRef.id}`
+
+    return NextResponse.json({ shareUrl })
   } catch (error) {
-    console.error('Error sharing list:', error)
-    return NextResponse.json(
-      { error: 'Failed to share list' },
-      { status: 500 }
-    )
+    console.error('Error creating shared list:', error)
+    return NextResponse.json({ error: 'Failed to create shared list' }, { status: 500 })
   }
 }
 

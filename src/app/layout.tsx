@@ -10,6 +10,7 @@ import Logo from './components/Logo'
 import InactivityHandler from './components/InactivityHandler'
 import UpdateNotification from './components/UpdateNotification'
 import VersionHistoryButton from './components/VersionHistoryButton'
+import MigrationModal from './components/MigrationModal'
 import { useState } from 'react'
 
 const spaceGrotesk = Space_Grotesk({ 
@@ -90,6 +91,7 @@ export default function RootLayout({
               forceShow={showUpdateManually} 
               onClose={() => setShowUpdateManually(false)} 
             />
+            <MigrationModal />
           </AuthProvider>
         </ThemeProvider>
       </body>

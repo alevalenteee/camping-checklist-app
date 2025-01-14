@@ -19,7 +19,8 @@ import {
   deleteDoc,
   serverTimestamp,
   DocumentData,
-  QueryDocumentSnapshot
+  QueryDocumentSnapshot,
+  writeBatch
 } from 'firebase/firestore'
 import { auth, db } from './firebase'
 import type { Category, SavedChecklist } from '@/lib/types'
@@ -69,13 +70,17 @@ export const saveChecklist = async (userId: string, name: string, categories: Ca
     }))
 
     const formattedName = name.trim()
-    const docRef = doc(db, 'users', userId, 'lists', formattedName)
+    const docRef = doc(db, `users/${userId}/lists`, formattedName)
     
     await setDoc(docRef, {
+      title: formattedName,
       name: formattedName,
+      userId: userId,
       categories: formattedCategories,
       updatedAt: serverTimestamp(),
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      sharedWith: [],
+      isPublic: false
     })
   } catch (error) {
     console.error('Error in saveChecklist:', error)
@@ -85,16 +90,18 @@ export const saveChecklist = async (userId: string, name: string, categories: Ca
 
 export const getUserChecklists = async (userId: string) => {
   try {
-    const listsRef = collection(db, 'users', userId, 'lists')
+    const listsRef = collection(db, `users/${userId}/lists`)
     const querySnapshot = await getDocs(listsRef)
     return querySnapshot.docs.map(doc => {
       const data = doc.data()
       return {
         id: doc.id,
-        name: data.name,
+        name: data.title || data.name || doc.id,
         categories: data.categories,
         createdAt: data.createdAt?.toDate?.() || new Date(),
-        updatedAt: data.updatedAt?.toDate?.() || new Date()
+        updatedAt: data.updatedAt?.toDate?.() || new Date(),
+        sharedWith: data.sharedWith || [],
+        isPublic: data.isPublic || false
       }
     })
   } catch (error) {
@@ -107,13 +114,25 @@ export const updateChecklist = async (
   userId: string,
   listName: string,
   categories: Category[],
+  sharedWith?: string[],
+  isPublic?: boolean
 ) => {
   try {
-    const listRef = doc(db, 'users', userId, 'lists', listName)
-    await updateDoc(listRef, {
+    const listRef = doc(db, `users/${userId}/lists`, listName)
+    const updateData: any = {
       categories,
       updatedAt: serverTimestamp()
-    })
+    }
+
+    // Only update sharing settings if provided
+    if (sharedWith !== undefined) {
+      updateData.sharedWith = sharedWith
+    }
+    if (isPublic !== undefined) {
+      updateData.isPublic = isPublic
+    }
+
+    await updateDoc(listRef, updateData)
   } catch (error) {
     console.error('Error updating checklist:', error)
     throw error
@@ -135,7 +154,7 @@ export const deleteChecklist = async (
       throw new Error('List name cannot be empty')
     }
     
-    await deleteDoc(doc(db, 'users', userId, 'lists', formattedName))
+    await deleteDoc(doc(db, `users/${userId}/lists`, formattedName))
   } catch (error) {
     console.error('Error deleting checklist:', error)
     throw error
@@ -179,12 +198,14 @@ const transformChecklist = (doc: QueryDocumentSnapshot<DocumentData>) => {
   const data = doc.data()
   return {
     id: doc.id,
-    name: data.name,
+    title: data.title,
     categories: data.categories.map((item: Category) => ({
       ...item,
       items: item.items || []
     })),
-    updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+    updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    sharedWith: data.sharedWith || [],
+    isPublic: data.isPublic || false
   }
 }
 
@@ -231,6 +252,109 @@ export const getSharedList = async (shareId: string) => {
     }
   } catch (error) {
     console.error('Error getting shared list:', error)
+    throw error
+  }
+}
+
+export const migrateChecklistsToNewStructure = async (userId: string) => {
+  try {
+    // Verify we have a valid user
+    if (!auth.currentUser || auth.currentUser.uid !== userId) {
+      throw new Error('Not authenticated or invalid user ID');
+    }
+
+    // Get all user's checklists
+    const listsRef = collection(db, `users/${userId}/lists`);
+    const querySnapshot = await getDocs(listsRef);
+    
+    if (querySnapshot.empty) {
+      console.log('No documents to migrate');
+      return { success: true, migratedCount: 0 };
+    }
+
+    const batch = writeBatch(db);
+    let updateCount = 0;
+    
+    querySnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      // Check if document needs migration
+      if (!data.title || data.name) {  // If no title or has old 'name' field
+        batch.update(doc.ref, {
+          title: data.name || data.title || doc.id, // Use name if exists, fallback to title or doc.id
+          name: data.name || data.title || doc.id,  // Keep both for backward compatibility
+          userId: userId,                           // Ensure userId is set
+          updatedAt: serverTimestamp(),
+          createdAt: data.createdAt || serverTimestamp()
+        });
+        updateCount++;
+      }
+    });
+
+    if (updateCount > 0) {
+      await batch.commit();
+      console.log(`Successfully migrated ${updateCount} checklists`);
+    } else {
+      console.log('No documents needed migration');
+    }
+    
+    return { success: true, migratedCount: updateCount };
+  } catch (error) {
+    console.error('Error migrating checklists:', error);
+    throw error;
+  }
+}
+
+// Test function to create a list with old structure
+export const createTestListOldStructure = async (userId: string) => {
+  try {
+    const oldList = {
+      name: "Test List (Old Structure)",
+      categories: [{
+        id: "cat1",
+        name: "Test Category",
+        items: [{
+          id: "item1",
+          text: "Test Item",
+          checked: false
+        }]
+      }],
+      updatedAt: serverTimestamp(),
+      createdAt: serverTimestamp()
+      // Intentionally missing title field to test migration
+    }
+
+    const docRef = doc(db, `users/${userId}/lists`, oldList.name)
+    await setDoc(docRef, oldList)
+    console.log('Created test list with old structure')
+    return oldList.name
+  } catch (error) {
+    console.error('Error creating test list:', error)
+    throw error
+  }
+}
+
+// Test function to verify list structure
+export const verifyListStructure = async (userId: string, listName: string) => {
+  try {
+    const docRef = doc(db, `users/${userId}/lists`, listName)
+    const docSnap = await getDoc(docRef)
+    
+    if (!docSnap.exists()) {
+      console.log('List not found')
+      return null
+    }
+    
+    const data = docSnap.data()
+    console.log('List structure:', {
+      hasTitle: !!data.title,
+      hasName: !!data.name,
+      hasUserId: !!data.userId,
+      hasCategories: !!data.categories,
+      hasTimestamps: !!data.createdAt && !!data.updatedAt
+    })
+    return data
+  } catch (error) {
+    console.error('Error verifying list:', error)
     throw error
   }
 }
