@@ -245,20 +245,32 @@ export default function SavedLists({ onLoadList }: Props) {
                      rounded-lg p-4 shadow-md hover:shadow-lg transition-all
                      cursor-pointer relative"
           >
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <h3 className="font-space-grotesk font-semibold text-gray-800 
                              dark:text-gray-200">
-                  {list.name}
+                  {editingList?.id === list.id ? (
+                    <input
+                      type="text"
+                      defaultValue={list.name}
+                      onBlur={(e) => handleRename(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-white dark:bg-gray-700 px-2 py-1 rounded"
+                      autoFocus
+                    />
+                  ) : (
+                    list.name
+                  )}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   Last updated {formatDate(list.updatedAt)}
-                </p>
+                </span>
               </div>
+              
               <div className="flex items-center gap-2">
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation()
                     handleShare(list)
                   }}
                   className={`p-2 text-green-600 dark:text-green-400
@@ -272,7 +284,7 @@ export default function SavedLists({ onLoadList }: Props) {
                 </button>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation()
                     setEditingList(list)
                   }}
                   className="p-2 text-green-600 dark:text-green-400
@@ -284,25 +296,25 @@ export default function SavedLists({ onLoadList }: Props) {
                 </button>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation()
                     onLoadList(list.categories, list.name)
                   }}
                   className="p-2 text-green-600 dark:text-green-400 
                            hover:bg-white/50 dark:hover:bg-gray-700/50 
                            rounded-lg transition-all"
-                  title="Load this list"
+                  title="Load list"
                 >
                   <ArrowPathIcon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation()
                     setDeleteId(list.id)
                   }}
                   className="p-2 text-red-600 dark:text-red-400 
                            hover:bg-white/50 dark:hover:bg-gray-700/50 
                            rounded-lg transition-all"
-                  title="Delete this list"
+                  title="Delete list"
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
