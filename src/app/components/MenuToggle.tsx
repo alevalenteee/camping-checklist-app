@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter, usePathname } from 'next/navigation'
 import { signInWithGoogle, signOut } from '@/lib/firebase/firebaseUtils'
 import Image from 'next/image'
+import ProfileImage from './ProfileImage'
 
 export default function MenuToggle() {
   const [isOpen, setIsOpen] = useState(false)
@@ -110,9 +111,14 @@ export default function MenuToggle() {
                              rounded-lg text-green-800 dark:text-green-400
                              font-space-grotesk font-semibold
                              hover:bg-white/70 dark:hover:bg-gray-600/50 
-                             transition-all text-center"
+                             transition-all relative"
                   >
-                    Profile
+                    {user && (
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                        <ProfileImage user={user} size="sm" />
+                      </div>
+                    )}
+                    <span className="w-full text-center">Profile</span>
                   </button>
                   <button
                     onClick={handleSignOut}
