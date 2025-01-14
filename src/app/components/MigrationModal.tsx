@@ -74,7 +74,7 @@ export default function MigrationModal() {
             </h3>
             
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Hi there! We've updated our security protocol to better protect your data. 
+              Hi there! We&apos;ve updated our security protocol to better protect your data. 
               We need to quickly migrate your lists to work with these new security measures.
             </p>
 
