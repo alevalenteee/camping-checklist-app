@@ -111,11 +111,11 @@ export default function SavedLists({ onLoadList }: Props) {
           ? { ...list, name: newName }
           : list
       ))
-      setEditingList(null)
     } catch (error) {
       console.error('Error renaming list:', error)
       setError('Failed to rename list')
     } finally {
+      setEditingList(null)
       setPendingRename(null)
       setIsConfirmOverwriteOpen(false)
     }
@@ -137,7 +137,6 @@ export default function SavedLists({ onLoadList }: Props) {
           ? { ...l, name: newName }
           : l
       ))
-      setEditingList(null)
     } catch (error) {
       console.error('Error overwriting list:', error)
       setError('Failed to rename list')
@@ -249,18 +248,7 @@ export default function SavedLists({ onLoadList }: Props) {
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <h3 className="font-space-grotesk font-semibold text-gray-800 
                              dark:text-gray-200">
-                  {editingList?.id === list.id ? (
-                    <input
-                      type="text"
-                      defaultValue={list.name}
-                      onBlur={(e) => handleRename(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="bg-white dark:bg-gray-700 px-2 py-1 rounded"
-                      autoFocus
-                    />
-                  ) : (
-                    list.name
-                  )}
+                  {list.name}
                 </h3>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Last updated {formatDate(list.updatedAt)}
@@ -338,7 +326,7 @@ export default function SavedLists({ onLoadList }: Props) {
         onSubmit={handleRename}
         title="Rename List"
         placeholder="Enter new name"
-        initialValue={editingList?.name}
+        initialValue={editingList?.name || ''}
       />
 
       <ConfirmationModal

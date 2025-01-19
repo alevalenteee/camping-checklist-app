@@ -6,6 +6,15 @@ interface VersionUpdate {
 
 export const versionHistory: VersionUpdate[] = [
   {
+    version: "1.1.1",
+    date: "15/01/2025",
+    features: [
+      "Fixed list renaming functionality",
+      "Improved rename modal interaction",
+      "Enhanced user experience when editing list names"
+    ]
+  },
+  {
     version: "1.1.0",
     date: "14/01/2025",
     features: [
