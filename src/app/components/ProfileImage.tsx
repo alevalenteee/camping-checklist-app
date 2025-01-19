@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { User } from 'firebase/auth'
 import Image from 'next/image'
 import { CameraIcon } from '@heroicons/react/24/outline'
@@ -15,6 +15,14 @@ interface Props {
 
 export default function ProfileImage({ user, size = 'sm', editable = false, onImageChange }: Props) {
   const [isHovering, setIsHovering] = useState(false)
+  const [imageLoadError, setImageLoadError] = useState(false)
+
+  // Reset error state when photoURL changes
+  useEffect(() => {
+    if (user?.photoURL) {
+      setImageLoadError(false)
+    }
+  }, [user?.photoURL])
 
   const getColorScheme = useMemo(() => {
     if (!user?.email) return { bg: 'bg-gray-500', text: 'text-white' }
@@ -48,6 +56,7 @@ export default function ProfileImage({ user, size = 'sm', editable = false, onIm
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file && onImageChange) {
+      setImageLoadError(false)
       await onImageChange(file)
     }
   }
@@ -62,30 +71,33 @@ export default function ProfileImage({ user, size = 'sm', editable = false, onIm
     lg: 96
   }
 
+  const renderInitial = () => (
+    <div className={`${sizeClasses[size]} rounded-full ${getColorScheme.bg}
+                    flex items-center justify-center ${getColorScheme.text} 
+                    font-space-grotesk font-semibold`}>
+      {getInitial()}
+    </div>
+  )
+
   return (
     <div className="relative">
-      {user?.photoURL ? (
-        <Image
-          loader={imageLoader}
-          src={user.photoURL}
-          alt={user.displayName || 'Profile'}
-          width={sizePx[size]}
-          height={sizePx[size]}
-          className={`rounded-full object-cover`}
-          onError={(e) => {
-            console.error('Error loading profile image:', e);
-            // Clear the src to show initial
-            const imgElement = e.target as HTMLImageElement;
-            imgElement.src = '';
-          }}
-        />
-      ) : (
-        <div className={`${sizeClasses[size]} rounded-full ${getColorScheme.bg}
-                        flex items-center justify-center ${getColorScheme.text} 
-                        font-space-grotesk font-semibold`}>
-          {getInitial()}
+      {user?.photoURL && !imageLoadError ? (
+        <div className="relative">
+          <Image
+            src={user.photoURL}
+            alt={user.displayName || 'Profile'}
+            width={sizePx[size]}
+            height={sizePx[size]}
+            className={`rounded-full object-cover ${sizeClasses[size]}`}
+            onError={(e) => {
+              console.warn('Error loading profile image, falling back to initial. URL:', user.photoURL);
+              setImageLoadError(true);
+            }}
+            unoptimized={true}
+            priority={true}
+          />
         </div>
-      )}
+      ) : renderInitial()}
     </div>
   )
 } 
